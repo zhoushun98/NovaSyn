@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NovaSyn
 
-## Getting Started
+NovaSyn 是一个基于 Next.js 16 构建的双语企业 AI 官网，当前以单页营销站形式呈现，支持中英文切换与响应式展示。
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16.2.1
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Framer Motion
+- Vitest + Testing Library
+
+## Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+打开 [http://localhost:3000](http://localhost:3000) 查看本地页面。
+
+## Available Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run test
+npm run lint
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cloudflare Pages Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+当前项目已配置为 **静态导出** 部署模式：
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `next.config.ts` 中启用了 `output: "export"`
+- 执行 `npm run build` 后会生成可直接部署的 `out/` 目录
 
-## Learn More
+### Cloudflare Pages 后台填写清单
 
-To learn more about Next.js, take a look at the following resources:
+- **Production branch**: `main`
+- **Build command**: `npm run build`
+- **Build output directory**: `out`
+- **Root directory**: 仓库根目录
+- **Node.js version**: `20`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Deployment Verification
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+本地部署前建议先执行：
 
-## Deploy on Vercel
+```bash
+npm run test
+npm run lint
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cloudflare Pages 部署完成后，重点检查：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 首页是否正常打开
+- 静态资源是否正常加载
+- 字体是否正常显示
+- 中英文切换是否正常
+- 刷新根路径 `/` 是否正常
+
+## Notes
+
+当前站点适合 Cloudflare Pages 静态托管。
+如果后续增加以下能力，需要重新评估部署方案：
+
+- `app/**/route.ts`
+- middleware
+- Server Actions
+- `cookies()` / `headers()`
+- 请求时动态渲染
+- 依赖服务端优化的 `next/image`
