@@ -14,7 +14,7 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "NovaSyn — Enterprise AI Platform",
+  title: "Clarionis 明谛 — Enterprise AI Platform",
   description:
     "A premium bilingual AI company website concept for enterprise customers, focused on trust, operational intelligence, and demo conversion.",
 };

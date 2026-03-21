@@ -1,6 +1,6 @@
-# NovaSyn
+# Clarionis
 
-NovaSyn 是一个基于 Next.js 16 构建的双语企业 AI 官网，当前以单页营销站形式呈现，支持中英文切换与响应式展示。
+Clarionis（明谛）是一个基于 Next.js 16 构建的双语企业 AI 官网，当前以单页营销站形式呈现，支持中英文切换与响应式展示。
 
 ## Tech Stack
 

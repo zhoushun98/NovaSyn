@@ -209,7 +209,7 @@ const content: Record<Locale, Content> = {
     },
     footer: {
       statement: "Premium AI systems for enterprise clarity, control, and momentum.",
-      contact: "hello@novasyn.ai",
+      contact: "hello@clarionis.ai",
     },
   },
   zh: {
@@ -331,7 +331,7 @@ const content: Record<Locale, Content> = {
     },
     footer: {
       statement: "为企业带来更清晰、更可控、更具推进力的 AI 系统。",
-      contact: "hello@novasyn.ai",
+      contact: "hello@clarionis.ai",
     },
   },
 };
@@ -370,7 +370,7 @@ export default function Home() {
               <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)] shadow-[0_0_24px_rgba(145,196,255,0.85)]" />
             </span>
             <span className="min-w-0">
-              <span className="block text-sm font-semibold tracking-[0.24em] uppercase">NovaSyn</span>
+              <span className="block text-sm font-semibold tracking-[0.24em] uppercase">Clarionis</span>
               <span className="hidden truncate text-[0.64rem] tracking-[0.28em] text-white/36 uppercase xl:block">
                 {copy.badge}
               </span>
@@ -689,7 +689,7 @@ export default function Home() {
           <a href={`mailto:${copy.footer.contact}`} className="transition hover:text-white/80">
             {copy.footer.contact}
           </a>
-          <span>© 2026 NovaSyn</span>
+          <span>© 2026 Clarionis</span>
         </div>
       </footer>
     </div>
