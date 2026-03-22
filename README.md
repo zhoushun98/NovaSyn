@@ -1,15 +1,23 @@
 # Clarionis
 
-Clarionis（明谛）是一个基于 Next.js 16 构建的双语企业 AI 官网，当前以单页营销站形式呈现，支持中英文切换与响应式展示。
+Clarionis（明谛）是一个基于 Next.js 16 构建的多语言企业 AI 营销网站，支持 5 种语言（英、中、德、法、日），以静态站点形式呈现，支持完整的响应式设计和国际化内容切换。
 
 ## Tech Stack
 
 - Next.js 16.2.1
-- React 19
-- TypeScript
+- React 19.2.4
+- TypeScript 5
 - Tailwind CSS v4
-- Framer Motion
-- Vitest + Testing Library
+- Framer Motion 12.38
+- Vitest 4.1 + Testing Library
+
+## Project Structure
+
+- **Supported Locales**: `en`, `zh`, `de`, `fr`, `ja`
+- **URL Structure**: Language-driven routing at `/<locale>/...` (e.g., `/zh/capabilities`, `/ja/solutions`)
+- **Root Route**: `src/app/(entry)/page.tsx` serves English homepage directly at `/`
+- **Content Management**: All copy lives in `src/app/site-content.ts` as the single source of truth
+- **UI Components**: Shared marketing components in `src/app/marketing-ui.tsx`
 
 ## Local Development
 
@@ -18,35 +26,44 @@ npm install
 npm run dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 查看本地页面。
+Open [http://localhost:3000](http://localhost:3000) to view the site. Navigation to `/zh`, `/de`, `/fr`, or `/ja` switches language context.
 
 ## Available Scripts
 
 ```bash
-npm run dev
-npm run test
-npm run lint
-npm run build
+npm run dev      # Start dev server
+npm run test     # Run tests
+npm run lint     # Lint code
+npm run build    # Production build
+npm run start    # Serve production build locally
 ```
 
-## Cloudflare Pages Deployment
+### Run Specific Tests
 
-当前项目已配置为 **静态导出** 部署模式：
+```bash
+npx vitest run src/app/page.test.tsx                    # Run single file
+npx vitest run -t "switches homepage copy to Chinese"   # Run by test name
+```
 
-- `next.config.ts` 中启用了 `output: "export"`
-- 执行 `npm run build` 后会生成可直接部署的 `out/` 目录
+## Deployment: Static Export via Cloudflare Pages
 
-### Cloudflare Pages 后台填写清单
+This project is configured for **static export** deployment:
+
+- `next.config.ts` has `output: "export"` enabled
+- `npm run build` generates a deployable `out/` directory
+- HTTP security headers are configured in `public/_headers` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`)
+
+### Cloudflare Pages Configuration
 
 - **Production branch**: `main`
 - **Build command**: `npm run build`
 - **Build output directory**: `out`
-- **Root directory**: 仓库根目录
+- **Root directory**: Repository root
 - **Node.js version**: `20`
 
-### Deployment Verification
+### Pre-Deployment Verification
 
-本地部署前建议先执行：
+Before deploying, run:
 
 ```bash
 npm run test
@@ -54,22 +71,24 @@ npm run lint
 npm run build
 ```
 
-Cloudflare Pages 部署完成后，重点检查：
+After deployment to Cloudflare Pages, verify:
 
-- 首页是否正常打开
-- 静态资源是否正常加载
-- 字体是否正常显示
-- 中英文切换是否正常
-- 刷新根路径 `/` 是否正常
+- Homepage loads at `/` (English by default)
+- Static assets load correctly
+- Fonts display properly
+- Language switching works for all 5 locales (`/zh`, `/de`, `/fr`, `/ja`)
+- Root path `/` refreshes without errors
+- `public/_redirects` is intentionally empty
 
-## Notes
+## Important Notes
 
-当前站点适合 Cloudflare Pages 静态托管。
-如果后续增加以下能力，需要重新评估部署方案：
+**Static Deployment Constraints**: This site is optimized for Cloudflare Pages static hosting. The following Next.js features are **not compatible** with static export and should trigger a re-evaluation of the deployment approach if added:
 
-- `app/**/route.ts`
+- `app/**/route.ts` (API routes)
 - middleware
 - Server Actions
-- `cookies()` / `headers()`
-- 请求时动态渲染
-- 依赖服务端优化的 `next/image`
+- `cookies()` or `headers()` functions
+- Dynamic rendering at request time
+- Server-side `next/image` optimization
+
+For architecture details and development conventions, see `CLAUDE.md`.
