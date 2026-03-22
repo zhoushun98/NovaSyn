@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const locales = ["en", "zh"] as const;
+export const locales = ["en", "zh", "de", "fr", "ja"] as const;
 
 export type Locale = (typeof locales)[number];
 export type PageKey = "home" | "capabilities" | "solutions" | "customers" | "about";
+
+export const localeSwitchLabels: Record<Locale, { label: string; ariaLabel: string }> = {
+  en: { label: "EN", ariaLabel: "EN" },
+  zh: { label: "中文", ariaLabel: "中文" },
+  de: { label: "DE", ariaLabel: "DE" },
+  fr: { label: "FR", ariaLabel: "FR" },
+  ja: { label: "日本語", ariaLabel: "日本語" },
+};
 
 export type NavItem = {
   label: string;
@@ -393,7 +401,459 @@ const content: Record<Locale, Content> = {
       },
     },
   },
+  de: {
+    badge: "Enterprise-AI-Plattform",
+    nav: [
+      { label: "Capabilities", href: "/capabilities" },
+      { label: "Solutions", href: "/solutions" },
+      { label: "Customers", href: "/customers" },
+      { label: "About", href: "/about" },
+    ],
+    languageLabel: "Sprache",
+    localeName: "Deutsch",
+    quickLinksLabel: "Schnellzugriffe",
+    mobileMenuLabel: "Menü",
+    mobileMenuNavLabel: "Mobile Navigation",
+    hero: {
+      title: "Integrieren Sie Intelligenz in jeden kritischen Arbeitsablauf.",
+      description:
+        "Eine Premium-AI-Plattform für Unternehmen, die präzisere Abläufe, verlässliche Ausführung und skalierbare Entscheidungsunterstützung benötigen.",
+      primaryCta: "Demo buchen",
+      secondaryCta: "Capabilities ansehen",
+      panelLabel: "Operative Intelligenz",
+      panelDescription:
+        "Premium-Oberflächen für geschäftskritische Workflows, Governance und nachhaltige operative Dynamik.",
+    },
+    thesis: {
+      eyebrow: "Markenthese",
+      heading: "AI sollte sich operativ, kontrolliert und geschäftsreif anfühlen.",
+      principles: [
+        "AI sollte Entscheidungen beschleunigen, nicht zusätzliche Komplexität erzeugen.",
+        "Unternehmensweite Einführung erfordert Kontrolle, nicht nur Fähigkeiten.",
+        "Die Zukunft gehört Systemen, die mit dem Geschäft lernen.",
+      ],
+    },
+    capabilities: {
+      eyebrow: "Capabilities",
+      heading: "Vier Ebenen unternehmerischer Intelligenz.",
+      items: [
+        {
+          title: "Intelligence",
+          description: "Verwandeln Sie fragmentierte Signale in kontextreiche operative Erkenntnisse.",
+        },
+        {
+          title: "Automation",
+          description: "Reduzieren Sie repetitive Arbeit in den Workflows, die am meisten zählen.",
+        },
+        {
+          title: "Orchestration",
+          description: "Verbinden Sie Teams, Systeme und Entscheidungen über eine gemeinsame AI-Schicht.",
+        },
+        {
+          title: "Governance",
+          description: "Sorgen Sie dafür, dass Ausführung beobachtbar, sicher und richtlinienkonform bleibt.",
+        },
+      ],
+    },
+    scenarios: {
+      eyebrow: "Solutions",
+      heading: "Entwickelt für die Workflows, die Unternehmensleistung bestimmen.",
+      items: [
+        {
+          title: "Operations Acceleration",
+          problem: "Manuelle Übergaben verlangsamen die Ausführung über Teams hinweg.",
+          outcome: "Bringen Sie Intelligenz in die Schleifen, die Lieferung und Durchsatz steuern.",
+        },
+        {
+          title: "Knowledge Intelligence",
+          problem: "Kritisches Wissen ist verteilt, uneinheitlich und schwer nutzbar.",
+          outcome: "Stellen Sie verlässlichen Kontext genau dort bereit, wo Teams Entscheidungen treffen.",
+        },
+        {
+          title: "Workflow Automation",
+          problem: "Teams verlieren Zeit durch repetitive Prozessarbeit und zersplitterte Werkzeuge.",
+          outcome: "Automatisieren Sie wiederholbare Aktionen und behalten Sie dennoch Transparenz und Kontrolle.",
+        },
+      ],
+    },
+    proof: {
+      eyebrow: "Kundenbelege",
+      heading: "Entwickelt, um das Vertrauen moderner Enterprise-Teams zu gewinnen.",
+      logos: ["Northstar Group", "Aether Systems", "Vector Capital", "Helio Works"],
+      metrics: [
+        { value: "40%", label: "schnellere Reaktionszyklen" },
+        { value: "3×", label: "mehr operativer Durchsatz" },
+        { value: "12", label: "eingeführte Geschäftsbereiche" },
+      ],
+      cases: [
+        {
+          client: "Global Retail Group",
+          summary: "Vereinheitlichte fragmentierte Entscheidungsflüsse über regionale Operations- und Planungsteams hinweg.",
+          result: "Reduzierte Eskalationsverzögerungen und verbesserte die Transparenz der Ausführung in der gesamten Organisation.",
+        },
+        {
+          client: "Enterprise Software Provider",
+          summary: "Führte AI-gestützte Wissensworkflows in hochvolumigen internen Abläufen ein.",
+          result: "Steigerte die Qualität der Mitarbeiterantworten, ohne Governance-Anforderungen zu gefährden.",
+        },
+      ],
+    },
+    trust: {
+      eyebrow: "Warum wir",
+      heading: "Enterprise-Vertrauen ist in die Plattform eingebaut.",
+      items: [
+        {
+          title: "Sicherheit von Anfang an",
+          description: "Schützen Sie Datenflüsse, Zugriffsgrenzen und operatives Vertrauen vom ersten Tag an.",
+        },
+        {
+          title: "Bereit für den Einsatz",
+          description: "Passt in reale Enterprise-Umgebungen mit pragmatischen Integrationspfaden.",
+        },
+        {
+          title: "Governance und Aufsicht",
+          description: "Halten Sie menschliches Urteilsvermögen, Auditierbarkeit und Richtlinienkontrolle nah an der Ausführung.",
+        },
+      ],
+    },
+    finalCta: {
+      eyebrow: "Executive Demo",
+      heading: "Erleben Sie, wie Enterprise-AI in Ihrem Unternehmen funktionieren kann.",
+      description:
+        "Buchen Sie eine individuelle Demo, um zu sehen, wie die Plattform zu Ihren Workflows, Ihrem Operating Model und Ihren Wachstumszielen passt.",
+      button: "Demo buchen",
+    },
+    footer: {
+      statement: "Premium-AI-Systeme für Klarheit, Kontrolle und Dynamik im Unternehmen.",
+      contact: "hello@clarionis.ai",
+    },
+    pageMeta: {
+      home: {
+        title: "Clarionis 明谛 — Enterprise-AI-Plattform",
+        description:
+          "Eine hochwertige mehrsprachige AI-Website für Enterprise-Kunden mit Fokus auf Vertrauen, operative Intelligenz und Demo-Konversion.",
+      },
+      capabilities: {
+        title: "Capabilities — Clarionis 明谛",
+        description: "Erkunden Sie Clarionis entlang von Intelligence, Automation, Orchestration und Governance.",
+      },
+      solutions: {
+        title: "Solutions — Clarionis 明谛",
+        description: "Sehen Sie, wie Clarionis Enterprise Operations, Wissensworkflows und Automatisierung unterstützt.",
+      },
+      customers: {
+        title: "Customers — Clarionis 明谛",
+        description: "Prüfen Sie Kundenbelege, Leistungskennzahlen und Enterprise-Fallstudien von Clarionis.",
+      },
+      about: {
+        title: "About — Clarionis 明谛",
+        description: "Erfahren Sie, wie Clarionis Enterprise-AI mit Vertrauen, Governance und Einsatzbereitschaft angeht.",
+      },
+    },
+  },
+  fr: {
+    badge: "Plateforme IA d'entreprise",
+    nav: [
+      { label: "Capabilities", href: "/capabilities" },
+      { label: "Solutions", href: "/solutions" },
+      { label: "Customers", href: "/customers" },
+      { label: "About", href: "/about" },
+    ],
+    languageLabel: "Langue",
+    localeName: "Français",
+    quickLinksLabel: "Accès rapides",
+    mobileMenuLabel: "Menu",
+    mobileMenuNavLabel: "Navigation mobile",
+    hero: {
+      title: "Intégrez l’intelligence dans chaque workflow critique.",
+      description:
+        "Une plateforme IA premium pour les entreprises qui recherchent des opérations plus nettes, une exécution fiable et une aide à la décision évolutive.",
+      primaryCta: "Réserver une démo",
+      secondaryCta: "Explorer les capabilities",
+      panelLabel: "Intelligence opérationnelle",
+      panelDescription:
+        "Des interfaces premium pour les workflows à forts enjeux, la gouvernance et l'élan opérationnel de l'entreprise.",
+    },
+    thesis: {
+      eyebrow: "Thèse de marque",
+      heading: "L’IA doit sembler opérationnelle, maîtrisée et prête pour l’entreprise.",
+      principles: [
+        "L’IA doit accélérer les décisions, pas ajouter de la complexité.",
+        "L’adoption en entreprise exige du contrôle, pas seulement des capacités.",
+        "L’avenir appartient aux systèmes qui apprennent avec l’entreprise.",
+      ],
+    },
+    capabilities: {
+      eyebrow: "Capabilities",
+      heading: "Quatre couches d’intelligence d’entreprise.",
+      items: [
+        {
+          title: "Intelligence",
+          description: "Transformez des signaux fragmentés en informations opérationnelles riches en contexte.",
+        },
+        {
+          title: "Automation",
+          description: "Réduisez le travail répétitif dans les workflows qui comptent le plus.",
+        },
+        {
+          title: "Orchestration",
+          description: "Connectez équipes, systèmes et décisions au sein d’une même couche IA.",
+        },
+        {
+          title: "Governance",
+          description: "Gardez une exécution observable, sécurisée et alignée avec les politiques.",
+        },
+      ],
+    },
+    scenarios: {
+      eyebrow: "Solutions",
+      heading: "Conçue pour les workflows qui définissent la performance de l’entreprise.",
+      items: [
+        {
+          title: "Operations Acceleration",
+          problem: "Les relais manuels ralentissent l’exécution entre les équipes.",
+          outcome: "Injectez de l’intelligence dans les boucles qui portent la livraison et le débit.",
+        },
+        {
+          title: "Knowledge Intelligence",
+          problem: "Les connaissances critiques sont dispersées, incohérentes et difficiles à exploiter.",
+          outcome: "Faites remonter un contexte fiable exactement là où les équipes prennent leurs décisions.",
+        },
+        {
+          title: "Workflow Automation",
+          problem: "Les équipes perdent du temps dans des tâches répétitives et des outils fragmentés.",
+          outcome: "Automatisez les actions répétables tout en conservant visibilité et contrôle.",
+        },
+      ],
+    },
+    proof: {
+      eyebrow: "Preuves clients",
+      heading: "Conçue pour gagner la confiance des équipes enterprise modernes.",
+      logos: ["Northstar Group", "Aether Systems", "Vector Capital", "Helio Works"],
+      metrics: [
+        { value: "40%", label: "cycles de réponse plus rapides" },
+        { value: "3×", label: "débit opérationnel" },
+        { value: "12", label: "unités métier déployées" },
+      ],
+      cases: [
+        {
+          client: "Global Retail Group",
+          summary: "A unifié des flux de décision fragmentés entre opérations régionales et équipes de planification.",
+          result: "A réduit le délai d’escalade et amélioré la visibilité de l’exécution à l’échelle de l’organisation.",
+        },
+        {
+          client: "Enterprise Software Provider",
+          summary: "A introduit des workflows de connaissance assistés par IA dans des opérations internes à fort volume.",
+          result: "A amélioré la qualité des réponses des équipes sans compromettre la gouvernance.",
+        },
+      ],
+    },
+    trust: {
+      eyebrow: "Pourquoi nous",
+      heading: "La confiance enterprise est intégrée à la plateforme.",
+      items: [
+        {
+          title: "Sécurité by design",
+          description: "Protégez les flux de données, les frontières d’accès et la confiance opérationnelle dès le départ.",
+        },
+        {
+          title: "Prête au déploiement",
+          description: "S’intègre dans de vrais environnements enterprise avec des chemins d’intégration pragmatiques.",
+        },
+        {
+          title: "Gouvernance et supervision",
+          description: "Gardez le jugement humain, l’auditabilité et le contrôle des politiques au plus près de l’exécution.",
+        },
+      ],
+    },
+    finalCta: {
+      eyebrow: "Démo exécutive",
+      heading: "Découvrez comment l’IA enterprise peut fonctionner dans votre entreprise.",
+      description:
+        "Réservez une démo sur mesure pour voir comment la plateforme peut s’adapter à vos workflows, à votre modèle opérationnel et à vos objectifs de croissance.",
+      button: "Réserver une démo",
+    },
+    footer: {
+      statement: "Des systèmes IA premium pour plus de clarté, de contrôle et d’élan en entreprise.",
+      contact: "hello@clarionis.ai",
+    },
+    pageMeta: {
+      home: {
+        title: "Clarionis 明谛 — Plateforme IA d'entreprise",
+        description:
+          "Un site IA multilingue haut de gamme pour les clients enterprise, centré sur la confiance, l’intelligence opérationnelle et la conversion démo.",
+      },
+      capabilities: {
+        title: "Capabilities — Clarionis 明谛",
+        description: "Explorez Clarionis à travers l’intelligence, l’automatisation, l’orchestration et la gouvernance.",
+      },
+      solutions: {
+        title: "Solutions — Clarionis 明谛",
+        description: "Découvrez comment Clarionis soutient les opérations enterprise, les workflows de connaissance et l’automatisation.",
+      },
+      customers: {
+        title: "Customers — Clarionis 明谛",
+        description: "Consultez les preuves clients, les métriques de performance et les cas d’usage enterprise de Clarionis.",
+      },
+      about: {
+        title: "About — Clarionis 明谛",
+        description: "Découvrez comment Clarionis aborde l’IA enterprise avec confiance, gouvernance et préparation au déploiement.",
+      },
+    },
+  },
+  ja: {
+    badge: "エンタープライズ AI プラットフォーム",
+    nav: [
+      { label: "Capabilities", href: "/capabilities" },
+      { label: "Solutions", href: "/solutions" },
+      { label: "Customers", href: "/customers" },
+      { label: "About", href: "/about" },
+    ],
+    languageLabel: "言語",
+    localeName: "日本語",
+    quickLinksLabel: "クイックリンク",
+    mobileMenuLabel: "メニュー",
+    mobileMenuNavLabel: "モバイルナビゲーション",
+    hero: {
+      title: "あらゆる重要な業務フローに intelligence を組み込む。",
+      description:
+        "より鋭いオペレーション、信頼できる実行、そして拡張可能な意思決定支援を必要とする企業向けのプレミアム AI プラットフォームです。",
+      primaryCta: "デモを予約",
+      secondaryCta: "Capabilities を見る",
+      panelLabel: "オペレーショナル・インテリジェンス",
+      panelDescription:
+        "重要業務のワークフロー、ガバナンス、そして企業の推進力のためのプレミアムな操作体験を提供します。",
+    },
+    thesis: {
+      eyebrow: "ブランドの視点",
+      heading: "企業に必要なのは派手な AI ではなく、運用でき、制御でき、実務に入れられる知能システムです。",
+      principles: [
+        "AI は複雑さを増やすのではなく、意思決定を加速させるべきです。",
+        "エンタープライズ導入には、機能だけでなくコントロールが必要です。",
+        "未来をつくるのは、事業とともに学び続けるシステムです。",
+      ],
+    },
+    capabilities: {
+      eyebrow: "Capabilities",
+      heading: "エンタープライズ知能を構成する 4 つのレイヤー。",
+      items: [
+        {
+          title: "Intelligence",
+          description: "分断されたシグナルを、文脈のある実行可能な業務インサイトへ変換します。",
+        },
+        {
+          title: "Automation",
+          description: "重要なワークフローにまたがる反復作業を減らします。",
+        },
+        {
+          title: "Orchestration",
+          description: "チーム、システム、意思決定をひとつの AI レイヤーで接続します。",
+        },
+        {
+          title: "Governance",
+          description: "実行を観測可能で、安全かつポリシーに沿った状態に保ちます。",
+        },
+      ],
+    },
+    scenarios: {
+      eyebrow: "Solutions",
+      heading: "企業パフォーマンスを左右するワークフローのために設計されています。",
+      items: [
+        {
+          title: "Operations Acceleration",
+          problem: "手作業の引き継ぎが、チーム横断の実行スピードを低下させています。",
+          outcome: "デリバリーと処理量を支えるループに知能を組み込みます。",
+        },
+        {
+          title: "Knowledge Intelligence",
+          problem: "重要な知識が分散し、一貫性がなく、活用しにくい状態です。",
+          outcome: "チームが意思決定する場所で、信頼できる文脈をそのまま届けます。",
+        },
+        {
+          title: "Workflow Automation",
+          problem: "反復的な業務と分断されたツールによって、チームの時間が失われています。",
+          outcome: "可視性とコントロールを保ちながら、繰り返し可能な作業を自動化します。",
+        },
+      ],
+    },
+    proof: {
+      eyebrow: "導入実績",
+      heading: "現代のエンタープライズチームに信頼されるために設計されています。",
+      logos: ["Northstar Group", "Aether Systems", "Vector Capital", "Helio Works"],
+      metrics: [
+        { value: "40%", label: "応答サイクルを短縮" },
+        { value: "3×", label: "オペレーション処理量" },
+        { value: "12", label: "導入済み事業部門" },
+      ],
+      cases: [
+        {
+          client: "Global Retail Group",
+          summary: "地域オペレーションと計画部門にまたがる分断された意思決定フローを統合しました。",
+          result: "エスカレーション遅延を減らし、組織全体の実行可視性を高めました。",
+        },
+        {
+          client: "Enterprise Software Provider",
+          summary: "大量の社内オペレーションに AI 支援のナレッジワークフローを導入しました。",
+          result: "ガバナンスを損なうことなく、従業員の応答品質を向上させました。",
+        },
+      ],
+    },
+    trust: {
+      eyebrow: "選ばれる理由",
+      heading: "エンタープライズの信頼は、プラットフォームの土台から組み込まれています。",
+      items: [
+        {
+          title: "設計段階からのセキュリティ",
+          description: "データフロー、アクセス境界、運用上の信頼を最初から保護します。",
+        },
+        {
+          title: "導入準備のしやすさ",
+          description: "現実の企業環境に適合し、実務的な統合パスを提供します。",
+        },
+        {
+          title: "ガバナンスと監督",
+          description: "人の判断、監査可能性、ポリシー制御を実行の近くに保ちます。",
+        },
+      ],
+    },
+    finalCta: {
+      eyebrow: "エグゼクティブデモ",
+      heading: "エンタープライズ AI が自社でどう機能するかを確認してください。",
+      description:
+        "ワークフロー、運用モデル、成長目標にこのプラットフォームがどう適合するかを、個別デモでご紹介します。",
+      button: "デモを予約",
+    },
+    footer: {
+      statement: "企業に、より高い明確さ、制御性、推進力をもたらすプレミアム AI システム。",
+      contact: "hello@clarionis.ai",
+    },
+    pageMeta: {
+      home: {
+        title: "Clarionis 明谛 — エンタープライズ AI プラットフォーム",
+        description:
+          "信頼性、オペレーショナル・インテリジェンス、デモ転換に焦点を当てた、エンタープライズ向け高品質多言語 AI サイト。",
+      },
+      capabilities: {
+        title: "Capabilities — Clarionis 明谛",
+        description: "Clarionis の Intelligence、Automation、Orchestration、Governance を確認できます。",
+      },
+      solutions: {
+        title: "Solutions — Clarionis 明谛",
+        description: "Clarionis が企業オペレーション、ナレッジワークフロー、自動化をどう支えるかをご覧ください。",
+      },
+      customers: {
+        title: "Customers — Clarionis 明谛",
+        description: "Clarionis の導入実績、成果指標、エンタープライズ事例を確認できます。",
+      },
+      about: {
+        title: "About — Clarionis 明谛",
+        description: "Clarionis が信頼、ガバナンス、導入準備性を軸にエンタープライズ AI に取り組む姿勢を紹介します。",
+      },
+    },
+  },
 };
+
+const localePrefixPattern = new RegExp(`^/(${locales.join("|")})(?=/|$)`);
 
 export function getStaticLocaleParams() {
   return locales.map((locale) => ({ locale }));
@@ -416,7 +876,7 @@ export function buildLocalizedPath(locale: Locale, href: "/" | NavItem["href"]) 
 }
 
 export function localizeCurrentPath(locale: Locale, currentPath: string) {
-  const stripped = currentPath.replace(/^\/(en|zh)/, "") || "";
+  const stripped = currentPath.replace(localePrefixPattern, "") || "";
   return stripped ? `/${locale}${stripped}` : `/${locale}`;
 }
 

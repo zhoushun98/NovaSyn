@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Manrope, Noto_Sans_JP } from "next/font/google";
 import "../globals.css";
 import { getPageMetadata, getStaticLocaleParams, resolveLocale } from "../site-content";
 
@@ -12,6 +12,12 @@ const display = Cormorant_Garamond({
 const sans = Manrope({
   variable: "--font-sans",
   subsets: ["latin"],
+});
+
+const japaneseSans = Noto_Sans_JP({
+  variable: "--font-sans-ja",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export function generateStaticParams() {
@@ -35,10 +41,17 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const locale = resolveLocale((await params).locale);
+  const isJapanese = locale === "ja";
 
   return (
-    <html lang={locale} className={`${display.variable} ${sans.variable} h-full`}>
-      <body className="min-h-full bg-[var(--bg)] text-[var(--fg)] antialiased">{children}</body>
+    <html lang={locale} className={`${display.variable} ${sans.variable} ${isJapanese ? japaneseSans.variable : ""} h-full`}>
+      <body
+        className={`min-h-full bg-[var(--bg)] text-[var(--fg)] antialiased ${
+          isJapanese ? "[--font-sans:var(--font-sans-ja)] [--font-display:var(--font-sans-ja)]" : ""
+        }`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

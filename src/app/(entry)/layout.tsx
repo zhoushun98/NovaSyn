@@ -14,9 +14,9 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Clarionis 明谛 — Enterprise AI Platform",
+  title: "Clarionis — Enterprise AI Platform",
   description:
-    "A premium bilingual AI company website concept for enterprise customers, focused on trust, operational intelligence, and demo conversion.",
+    "A premium AI company website concept for enterprise customers, focused on trust, operational intelligence, and demo conversion.",
 };
 
 export default function EntryLayout({

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { buildLocalizedPath, getContent, localizeCurrentPath, type Locale } from "./site-content";
+import { buildLocalizedPath, getContent, localeSwitchLabels, locales, localizeCurrentPath, type Locale } from "./site-content";
 
 const sectionReveal = {
   initial: { opacity: 0, y: 32 },
@@ -59,9 +59,12 @@ export function MarketingShell({
 }) {
   const copy = getContent(locale);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
+  const langButtonRef = useRef<HTMLButtonElement | null>(null);
+  const langDropdownRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuItems = buildMobileMenuItems(locale, currentPath);
 
   const [prevLocale, setPrevLocale] = useState(locale);
@@ -70,6 +73,7 @@ export function MarketingShell({
     setPrevLocale(locale);
     setPrevPath(currentPath);
     setIsMobileMenuOpen(false);
+    setIsLangOpen(false);
   }
 
   useEffect(() => {
@@ -104,6 +108,39 @@ export function MarketingShell({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isLangOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+
+      if (
+        target &&
+        !langDropdownRef.current?.contains(target) &&
+        !langButtonRef.current?.contains(target)
+      ) {
+        setIsLangOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsLangOpen(false);
+        langButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLangOpen]);
 
   useEffect(() => {
     if (!isMobileMenuOpen || typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -180,30 +217,60 @@ export function MarketingShell({
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="hidden text-[0.64rem] tracking-[0.32em] text-white/34 uppercase lg:block">
-              {copy.languageLabel}
-            </div>
-            <div className="flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              {(["en", "zh"] as const).map((value) => {
-                const href = localizeCurrentPath(value, currentPath);
-                const isActive = locale === value;
+            <div className="relative">
+              <button
+                ref={langButtonRef}
+                type="button"
+                aria-label="Switch language"
+                aria-expanded={isLangOpen}
+                aria-haspopup="true"
+                onClick={() => setIsLangOpen((v) => !v)}
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <span>{localeSwitchLabels[locale].label}</span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                  aria-hidden="true"
+                  className={`transition-transform ${isLangOpen ? "rotate-180" : ""}`}
+                >
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
 
-                return (
-                  <Link
-                    key={value}
-                    href={href}
-                    aria-label={value === "en" ? "EN" : "中文"}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`rounded-full px-3 py-1.5 text-xs transition ${
-                      isActive
-                        ? "bg-white text-black shadow-[0_8px_18px_rgba(255,255,255,0.16)]"
-                        : "text-white/58 hover:text-white"
-                    }`}
-                  >
-                    {value === "en" ? "EN" : "中文"}
-                  </Link>
-                );
-              })}
+              {isLangOpen && (
+                <div
+                  ref={langDropdownRef}
+                  className="absolute right-0 top-full z-50 mt-2 min-w-[7rem] rounded-2xl border border-white/10 bg-[rgba(6,10,20,0.92)] py-1.5 shadow-[0_16px_48px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
+                >
+                  {locales.map((value) => {
+                    const href = localizeCurrentPath(value, currentPath);
+                    const isActive = locale === value;
+                    const switchLabel = localeSwitchLabels[value];
+
+                    return (
+                      <Link
+                        key={value}
+                        href={href}
+                        aria-label={switchLabel.ariaLabel}
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={() => setIsLangOpen(false)}
+                        className={`flex items-center gap-2.5 px-4 py-2 text-sm transition ${
+                          isActive ? "text-white" : "text-white/52 hover:text-white"
+                        }`}
+                      >
+                        {isActive && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                        )}
+                        {!isActive && <span className="h-1.5 w-1.5" />}
+                        {switchLabel.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             <button
               ref={menuButtonRef}

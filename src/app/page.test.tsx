@@ -11,6 +11,14 @@ import Home from "./(entry)/page";
 import { getContent, getStaticLocaleParams } from "./site-content";
 
 const appPath = (...segments: string[]) => path.join(process.cwd(), "src", "app", ...segments);
+const supportedLocales = ["en", "zh", "de", "fr", "ja"] as const;
+const homepageHeadings = {
+  en: /build intelligence into every critical workflow/i,
+  zh: /把智能真正嵌入每一个关键业务流程/i,
+  de: /intelligenz in jeden kritischen arbeitsablauf/i,
+  fr: /intégrez l['’]intelligence dans chaque workflow critique/i,
+  ja: /あらゆる重要な業務フローに intelligence を組み込む/i,
+} satisfies Record<(typeof supportedLocales)[number], RegExp>;
 
 type MatchMediaListener = (event: MediaQueryListEvent) => void;
 
@@ -44,79 +52,76 @@ function installMatchMedia(initialMatches = false) {
 }
 
 describe("marketing routes", () => {
-  it("defines a production redirect from / to /en", () => {
+  it("does not define a production redirect from / to /en", () => {
     const redirects = readFileSync(path.join(process.cwd(), "public", "_redirects"), "utf8");
 
-    expect(redirects).toBe("/ /en 301\n");
+    expect(redirects).toBe("");
   });
 
-  it("renders a root fallback that sends visitors to /en without showing a language picker", () => {
-    const replace = vi.fn();
-    const originalLocation = window.location;
-
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: {
-        ...originalLocation,
-        replace,
-      },
-    });
-
-    render(<Home />);
-
-    expect(screen.getByRole("heading", { name: /redirecting to english/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /continue to english/i })).toHaveAttribute("href", "/en");
-    expect(screen.queryByRole("link", { name: /中文/i })).not.toBeInTheDocument();
-    expect(replace).toHaveBeenCalledWith("/en");
-
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: originalLocation,
-    });
-  });
-
-  it("statically exports both supported locales", () => {
-    expect(getStaticLocaleParams()).toEqual([{ locale: "en" }, { locale: "zh" }]);
-  });
-
-  it("renders the English homepage with a localized mobile Menu button and no quick links nav", async () => {
-    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+  it("renders the English homepage at / instead of a redirect screen", async () => {
+    render(await Home());
 
     expect(
       screen.getByRole("heading", {
-        name: /build intelligence into every critical workflow/i,
+        name: homepageHeadings.en,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^menu$/i })).toBeInTheDocument();
-    expect(screen.queryByRole("navigation", { name: /quick links/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /redirecting to english/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /continue to english/i })).not.toBeInTheDocument();
   });
 
-  it("renders the Chinese homepage with a localized mobile 菜单 button and no quick links nav", async () => {
-    render(await LocaleHomePage({ params: Promise.resolve({ locale: "zh" }) }));
+  it("keeps the root entry metadata in English", () => {
+    const source = readFileSync(appPath("(entry)", "layout.tsx"), "utf8");
+
+    expect(source).toContain('title: "Clarionis — Enterprise AI Platform"');
+    expect(source).not.toContain("Clarionis 明谛 —");
+  });
+
+  it("statically exports all supported locales", () => {
+    expect(getStaticLocaleParams()).toEqual([
+      { locale: "en" },
+      { locale: "zh" },
+      { locale: "de" },
+      { locale: "fr" },
+      { locale: "ja" },
+    ]);
+  });
+
+  it.each(supportedLocales)("renders the %s homepage with localized copy", async (locale) => {
+    render(await LocaleHomePage({ params: Promise.resolve({ locale }) }));
 
     expect(
       screen.getByRole("heading", {
-        name: /把智能真正嵌入每一个关键业务流程/i,
+        name: homepageHeadings[locale],
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^菜单$/i })).toBeInTheDocument();
-    expect(screen.queryByRole("navigation", { name: /快捷导航/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: new RegExp(`^${getContent(locale).mobileMenuLabel}$`, "i") })).toBeInTheDocument();
   });
 
-  it("keeps language switching on the same page path", async () => {
+  it("keeps language switching on the same page path for every supported locale", async () => {
+    const user = userEvent.setup();
+
     render(await SolutionsPage({ params: Promise.resolve({ locale: "en" }) }));
 
-    expect(screen.getByRole("link", { name: /中文/i })).toHaveAttribute("href", "/zh/solutions");
+    await user.click(screen.getByRole("button", { name: /switch language/i }));
+
+    expect(screen.getByRole("link", { name: "中文" })).toHaveAttribute("href", "/zh/solutions");
+    expect(screen.getByRole("link", { name: "DE" })).toHaveAttribute("href", "/de/solutions");
+    expect(screen.getByRole("link", { name: "FR" })).toHaveAttribute("href", "/fr/solutions");
+    expect(screen.getByRole("link", { name: "日本語" })).toHaveAttribute("href", "/ja/solutions");
   });
 
-  it("keeps mobile menu copy in site content for both locales", () => {
-    const english = getContent("en");
-    const chinese = getContent("zh");
-
-    expect(english.mobileMenuLabel).toBe("Menu");
-    expect(english.mobileMenuNavLabel).toBe("Mobile navigation");
-    expect(chinese.mobileMenuLabel).toBe("菜单");
-    expect(chinese.mobileMenuNavLabel).toBe("移动端导航");
+  it("keeps mobile menu copy in site content for all locales", () => {
+    expect(getContent("en").mobileMenuLabel).toBe("Menu");
+    expect(getContent("en").mobileMenuNavLabel).toBe("Mobile navigation");
+    expect(getContent("zh").mobileMenuLabel).toBe("菜单");
+    expect(getContent("zh").mobileMenuNavLabel).toBe("移动端导航");
+    expect(getContent("de").mobileMenuLabel).toBe("Menü");
+    expect(getContent("de").mobileMenuNavLabel).toBe("Mobile Navigation");
+    expect(getContent("fr").mobileMenuLabel).toBe("Menu");
+    expect(getContent("fr").mobileMenuNavLabel).toBe("Navigation mobile");
+    expect(getContent("ja").mobileMenuLabel).toBe("メニュー");
+    expect(getContent("ja").mobileMenuNavLabel).toBe("モバイルナビゲーション");
   });
 
   it("opens the English mobile menu with the expected nav order and CTA target", async () => {
@@ -140,6 +145,24 @@ describe("marketing routes", () => {
       "href",
       "mailto:hello@clarionis.ai",
     );
+  });
+
+  it("shows a dropdown button for the current locale and opens it to reveal all options", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "fr" }) }));
+
+    const trigger = screen.getByRole("button", { name: /language.*FR|FR.*language|switch language/i });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(trigger);
+
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "EN" })).toHaveAttribute("href", "/en");
+    expect(screen.getByRole("link", { name: "中文" })).toHaveAttribute("href", "/zh");
+    expect(screen.getByRole("link", { name: "DE" })).toHaveAttribute("href", "/de");
+    expect(screen.getByRole("link", { name: "FR" })).toHaveAttribute("href", "/fr");
+    expect(screen.getByRole("link", { name: "日本語" })).toHaveAttribute("href", "/ja");
   });
 
   it("toggles aria-expanded on the mobile menu button and wires aria-controls", async () => {
@@ -237,10 +260,10 @@ describe("marketing routes", () => {
     await user.click(screen.getByRole("button", { name: /^menu$/i }));
     expect(screen.getByRole("navigation", { name: /mobile navigation/i })).toBeInTheDocument();
 
-    rerender(await LocaleHomePage({ params: Promise.resolve({ locale: "zh" }) }));
+    rerender(await LocaleHomePage({ params: Promise.resolve({ locale: "ja" }) }));
 
-    expect(screen.queryByRole("navigation", { name: /移动端导航/i })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^菜单$/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("navigation", { name: /モバイルナビゲーション/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^メニュー$/i })).toHaveAttribute("aria-expanded", "false");
   });
 
   it("closes the mobile menu when the viewport crosses to desktop width", async () => {
@@ -259,17 +282,16 @@ describe("marketing routes", () => {
     });
   });
 
-  it("keeps the header breakpoint split on lg and removes the old quick links markup in source", () => {
+  it("keeps the header breakpoint split on lg and uses a language dropdown button", () => {
     const source = readFileSync(appPath("marketing-ui.tsx"), "utf8");
 
     expect(source).toContain('className="hidden items-center gap-2 lg:flex"');
     expect(source).toContain(
-      'className="hidden text-[0.64rem] tracking-[0.32em] text-white/34 uppercase lg:block"',
-    );
-    expect(source).toContain(
       'className="hidden rounded-full border border-white/12 bg-white px-5 py-3 text-sm font-medium text-black transition hover:border-white/20 hover:bg-[var(--accent-soft)] lg:inline-flex"',
     );
     expect(source).toContain('aria-controls="mobile-site-menu"');
+    expect(source).toContain('"Switch language"');
+    expect(source).toContain("aria-expanded={isLangOpen}");
     expect(source).not.toContain("aria-label={copy.quickLinksLabel}");
   });
 
@@ -290,10 +312,17 @@ describe("marketing routes", () => {
     expect(source).toContain("<html lang={locale}");
   });
 
+  it("adds explicit Japanese font support in the locale layout source", () => {
+    const source = readFileSync(appPath("[locale]", "layout.tsx"), "utf8");
+
+    expect(source).toContain("Noto_Sans_JP");
+    expect(source).toContain('locale === "ja"');
+  });
+
   it("does not force all links to inherit text color globally", () => {
     const css = readFileSync(appPath("globals.css"), "utf8");
 
-    expect(css).not.toMatch(/a\\s*\\{[^}]*color:\\s*inherit;?/s);
+    expect(css).not.toMatch(/a\s*\{[^}]*color:\s*inherit;?/s);
   });
 
   it("keeps the localized home hero compact enough to reveal lower content on first view", () => {
