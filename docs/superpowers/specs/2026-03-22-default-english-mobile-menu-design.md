@@ -19,9 +19,10 @@ Clarionis should no longer stop first-time visitors on a language-picker landing
 ### Root path
 - Visiting `/` should end at `/en` immediately for production traffic.
 - Because this repo uses Next.js static export (`output: "export"`), this redirect should be implemented as a Cloudflare Pages hosting-level redirect rather than a Next.js `redirects()` config.
+- The source-controlled deployment artifact should be the Cloudflare Pages redirect file checked into the repo (for example, the standard `_redirects` file emitted with the static site), with a rule that sends `/` to `/en`.
 - The standalone language selection screen should be removed from the primary browsing flow.
 - Canonical browsing paths remain locale-prefixed (`/en`, `/zh`, `/en/capabilities`, `/zh/about`, etc.).
-- Local development and test coverage should use a build-safe fallback for `/` that aligns with the production outcome, but production deployment behavior is the hosting-level redirect.
+- When the hosting redirect is not in effect locally, the exported `/` page should behave as a minimal fallback that immediately navigates visitors to `/en`, without reintroducing a language-choice UI.
 
 ### Locale switching
 - Switching languages should continue to preserve the current page path.
@@ -33,10 +34,12 @@ Clarionis should no longer stop first-time visitors on a language-picker landing
 The current mobile experience stacks a four-item quick-links block directly beneath the sticky header. This consumes too much vertical space and makes the top of the page feel cramped and list-like instead of refined.
 
 ### New structure
-On mobile widths, the sticky header should contain only:
+At widths below the existing `lg` breakpoint, the sticky header should contain only:
 - Brand mark / wordmark on the left
 - Locale switcher on the right
 - `Menu` button on the right
+
+At `lg` and above, the current desktop header pattern remains in place.
 
 The page-link quick-nav block under the header should be removed on mobile.
 
@@ -88,11 +91,12 @@ Key visual intent:
 
 ## Implementation outline
 ### Routes
-- Replace the current root landing implementation with a redirect to `/en`.
-- Keep localized routes under `[locale]` unchanged.
+- Keep the localized routes under `[locale]` unchanged.
+- Replace the current root landing implementation with a minimal exported fallback page that immediately navigates to `/en` when the hosting redirect is not active.
+- Add the Cloudflare Pages redirect artifact to the repo so production requests to `/` are redirected to `/en` at the hosting layer.
 
 ### Navigation shell
-- Add mobile-only menu state to the shared marketing shell.
+- Add mobile-only menu state to the shared marketing shell for widths below `lg`.
 - Render a `Menu` button beside the locale switcher.
 - Render a conditional mobile dropdown panel inside the header area.
 - Remove the old mobile quick-links block from the main page flow.
@@ -103,10 +107,10 @@ Key visual intent:
 
 ## Testing expectations
 Add or update tests to verify:
-- Production redirect handling for `/` is defined in a static-export-compatible way, with coverage aimed at the chosen Cloudflare Pages redirect artifact or equivalent deployment-facing configuration.
-- Any local/test fallback for `/` aligns with the production outcome of landing on `/en`.
+- Production redirect handling for `/` is defined in the checked-in Cloudflare Pages redirect artifact.
+- The exported `/` fallback does not render the old language picker and instead immediately navigates toward `/en`.
 - The old language selection content is no longer the live root entry experience.
-- Mobile navigation exposes a `Menu` control instead of the old top quick-links block.
+- Mobile navigation exposes a `Menu` control instead of the old top quick-links block below the `lg` breakpoint.
 - The old mobile quick-links block is absent in the mobile layout.
 - The mobile menu includes the four page links and the existing `mailto` CTA.
 - The mobile menu renders correctly in both English and Chinese, including localized labels.
