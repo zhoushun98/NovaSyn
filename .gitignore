@@ -54,3 +54,6 @@ next-env.d.ts
 # Claude Code
 /.claude/
 /.worktrees/
+
+# Superpowers working docs (plans/specs generated during development)
+/docs/superpowers/
