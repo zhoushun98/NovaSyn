@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { buildLocalizedPath, getContent, localizeCurrentPath, type Locale } from "./site-content";
@@ -14,6 +14,7 @@ const sectionReveal = {
 
 const panelClass =
   "rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl";
+const desktopBreakpointQuery = "(min-width: 1024px)";
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -21,6 +22,30 @@ function SectionLabel({ children }: { children: string }) {
       {children}
     </span>
   );
+}
+
+function buildMobileMenuItems(locale: Locale, currentPath: string) {
+  const copy = getContent(locale);
+
+  return [
+    ...copy.nav.map((item) => {
+      const href = buildLocalizedPath(locale, item.href);
+      return {
+        key: item.href,
+        href,
+        label: item.label,
+        isActive: currentPath === href,
+        isCta: false,
+      };
+    }),
+    {
+      key: "cta",
+      href: `mailto:${copy.footer.contact}`,
+      label: copy.hero.primaryCta,
+      isActive: false,
+      isCta: true,
+    },
+  ];
 }
 
 export function MarketingShell({
@@ -33,6 +58,87 @@ export function MarketingShell({
   children: ReactNode;
 }) {
   const copy = getContent(locale);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
+  const mobileMenuItems = buildMobileMenuItems(locale, currentPath);
+
+  const [prevLocale, setPrevLocale] = useState(locale);
+  const [prevPath, setPrevPath] = useState(currentPath);
+  if (prevLocale !== locale || prevPath !== currentPath) {
+    setPrevLocale(locale);
+    setPrevPath(currentPath);
+    setIsMobileMenuOpen(false);
+  }
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+
+      if (
+        target &&
+        !mobileMenuRef.current?.contains(target) &&
+        !menuButtonRef.current?.contains(target)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen || typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(desktopBreakpointQuery);
+
+    if (mediaQuery.matches) {
+      queueMicrotask(() => setIsMobileMenuOpen(false));
+      return;
+    }
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    mediaQuery.addEventListener?.("change", handleChange);
+    mediaQuery.addListener?.(handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener?.("change", handleChange);
+      mediaQuery.removeListener?.(handleChange);
+    };
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    firstMenuItemRef.current?.focus();
+  }, [isMobileMenuOpen]);
 
   return (
     <div className="relative overflow-hidden bg-[var(--bg)] text-[var(--fg)]">
@@ -74,7 +180,7 @@ export function MarketingShell({
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="hidden text-[0.64rem] tracking-[0.32em] text-white/34 uppercase md:block">
+            <div className="hidden text-[0.64rem] tracking-[0.32em] text-white/34 uppercase lg:block">
               {copy.languageLabel}
             </div>
             <div className="flex rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
@@ -99,39 +205,56 @@ export function MarketingShell({
                 );
               })}
             </div>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label={copy.mobileMenuLabel}
+              aria-controls="mobile-site-menu"
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((value) => !value)}
+              className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/78 transition hover:bg-white/[0.08] hover:text-white lg:hidden"
+            >
+              {copy.mobileMenuLabel}
+            </button>
             <Link
               href={`mailto:${copy.footer.contact}`}
-              className="hidden rounded-full border border-white/12 bg-white px-5 py-3 text-sm font-medium text-black transition hover:border-white/20 hover:bg-[var(--accent-soft)] md:inline-flex"
+              className="hidden rounded-full border border-white/12 bg-white px-5 py-3 text-sm font-medium text-black transition hover:border-white/20 hover:bg-[var(--accent-soft)] lg:inline-flex"
             >
               {copy.hero.primaryCta}
             </Link>
           </div>
         </div>
+
+        {isMobileMenuOpen ? (
+          <div
+            id="mobile-site-menu"
+            ref={mobileMenuRef}
+            className="mx-auto mt-3 w-full max-w-7xl rounded-[1.75rem] border border-white/10 bg-[rgba(6,10,20,0.78)] p-3 shadow-[0_20px_60px_rgba(0,0,0,0.32)] backdrop-blur-2xl lg:hidden"
+          >
+            <nav aria-label={copy.mobileMenuNavLabel} className="grid gap-2 text-sm text-white/72">
+              {mobileMenuItems.map((item, index) => (
+                <Link
+                  key={`mobile-${item.key}`}
+                  ref={index === 0 ? firstMenuItemRef : undefined}
+                  href={item.href}
+                  aria-current={item.isActive ? "page" : undefined}
+                  className={`rounded-full px-4 py-2 transition ${
+                    item.isCta
+                      ? "border border-white/12 bg-white text-center font-medium text-black hover:border-white/20 hover:bg-[var(--accent-soft)]"
+                      : item.isActive
+                        ? "bg-white/[0.08] text-white"
+                        : "bg-white/[0.04] hover:bg-white/[0.08] hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        ) : null}
       </header>
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-24 px-5 pb-14 pt-4 md:px-10 md:gap-32 md:pt-12">
-        <nav
-          aria-label={copy.quickLinksLabel}
-          className="grid gap-2 rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-3 text-sm text-white/72 lg:hidden"
-        >
-          {copy.nav.map((item) => {
-            const href = buildLocalizedPath(locale, item.href);
-            const isActive = currentPath === href;
-
-            return (
-              <Link
-                key={`mobile-${item.href}`}
-                href={href}
-                aria-current={isActive ? "page" : undefined}
-                className={`rounded-full px-4 py-2 transition ${
-                  isActive ? "bg-white text-black" : "bg-white/[0.04] hover:bg-white/[0.08] hover:text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
         {children}
       </main>
 

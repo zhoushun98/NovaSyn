@@ -44,6 +44,8 @@ export type Content = {
   languageLabel: string;
   localeName: string;
   quickLinksLabel: string;
+  mobileMenuLabel: string;
+  mobileMenuNavLabel: string;
   hero: {
     title: string;
     description: string;
@@ -104,6 +106,8 @@ const content: Record<Locale, Content> = {
     languageLabel: "Language",
     localeName: "English",
     quickLinksLabel: "Quick links",
+    mobileMenuLabel: "Menu",
+    mobileMenuNavLabel: "Mobile navigation",
     hero: {
       title: "Build intelligence into every critical workflow.",
       description:
@@ -252,6 +256,8 @@ const content: Record<Locale, Content> = {
     languageLabel: "语言",
     localeName: "中文",
     quickLinksLabel: "快捷导航",
+    mobileMenuLabel: "菜单",
+    mobileMenuNavLabel: "移动端导航",
     hero: {
       title: "把智能真正嵌入每一个关键业务流程。",
       description:

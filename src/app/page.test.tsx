@@ -1,15 +1,47 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import { getStaticLocaleParams } from "./site-content";
 import AboutPage from "./[locale]/about/page";
-import LocaleHomePage from "./[locale]/page";
 import CustomersPage from "./[locale]/customers/page";
+import LocaleHomePage from "./[locale]/page";
 import SolutionsPage from "./[locale]/solutions/page";
 import Home from "./(entry)/page";
+import { getContent, getStaticLocaleParams } from "./site-content";
 
 const appPath = (...segments: string[]) => path.join(process.cwd(), "src", "app", ...segments);
+
+type MatchMediaListener = (event: MediaQueryListEvent) => void;
+
+function installMatchMedia(initialMatches = false) {
+  let matches = initialMatches;
+  const listeners = new Set<MatchMediaListener>();
+
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      get matches() {
+        return matches;
+      },
+      media: query,
+      onchange: null,
+      addEventListener: (_event: "change", listener: MatchMediaListener) => listeners.add(listener),
+      removeEventListener: (_event: "change", listener: MatchMediaListener) => listeners.delete(listener),
+      addListener: (listener: MatchMediaListener) => listeners.add(listener),
+      removeListener: (listener: MatchMediaListener) => listeners.delete(listener),
+      dispatchEvent: () => true,
+    })),
+  );
+
+  return {
+    setMatches(nextMatches: boolean) {
+      matches = nextMatches;
+      const event = { matches: nextMatches, media: "(min-width: 1024px)" } as MediaQueryListEvent;
+      listeners.forEach((listener) => listener(event));
+    },
+  };
+}
 
 describe("marketing routes", () => {
   it("defines a production redirect from / to /en", () => {
@@ -47,7 +79,7 @@ describe("marketing routes", () => {
     expect(getStaticLocaleParams()).toEqual([{ locale: "en" }, { locale: "zh" }]);
   });
 
-  it("renders the English homepage as a localized route", async () => {
+  it("renders the English homepage with a localized mobile Menu button and no quick links nav", async () => {
     render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
 
     expect(
@@ -55,10 +87,11 @@ describe("marketing routes", () => {
         name: /build intelligence into every critical workflow/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: /quick links/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^menu$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: /quick links/i })).not.toBeInTheDocument();
   });
 
-  it("renders the Chinese homepage as a localized route", async () => {
+  it("renders the Chinese homepage with a localized mobile 菜单 button and no quick links nav", async () => {
     render(await LocaleHomePage({ params: Promise.resolve({ locale: "zh" }) }));
 
     expect(
@@ -66,11 +99,8 @@ describe("marketing routes", () => {
         name: /把智能真正嵌入每一个关键业务流程/i,
       }),
     ).toBeInTheDocument();
-    const quickLinks = screen.getByRole("navigation", { name: /快捷导航/i });
-    expect(within(quickLinks).getByRole("link", { name: /^关于$/i })).toHaveAttribute(
-      "href",
-      "/zh/about",
-    );
+    expect(screen.getByRole("button", { name: /^菜单$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: /快捷导航/i })).not.toBeInTheDocument();
   });
 
   it("keeps language switching on the same page path", async () => {
@@ -79,14 +109,168 @@ describe("marketing routes", () => {
     expect(screen.getByRole("link", { name: /中文/i })).toHaveAttribute("href", "/zh/solutions");
   });
 
-  it("marks the active page in primary navigation", async () => {
+  it("keeps mobile menu copy in site content for both locales", () => {
+    const english = getContent("en");
+    const chinese = getContent("zh");
+
+    expect(english.mobileMenuLabel).toBe("Menu");
+    expect(english.mobileMenuNavLabel).toBe("Mobile navigation");
+    expect(chinese.mobileMenuLabel).toBe("菜单");
+    expect(chinese.mobileMenuNavLabel).toBe("移动端导航");
+  });
+
+  it("opens the English mobile menu with the expected nav order and CTA target", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    await user.click(screen.getByRole("button", { name: /^menu$/i }));
+
+    const mobileMenu = screen.getByRole("navigation", { name: /mobile navigation/i });
+    const links = within(mobileMenu).getAllByRole("link");
+
+    expect(links.map((link) => link.textContent?.trim())).toEqual([
+      "Capabilities",
+      "Solutions",
+      "Customers",
+      "About",
+      "Book a Demo",
+    ]);
+    expect(within(mobileMenu).getByRole("link", { name: /book a demo/i })).toHaveAttribute(
+      "href",
+      "mailto:hello@clarionis.ai",
+    );
+  });
+
+  it("toggles aria-expanded on the mobile menu button and wires aria-controls", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    const button = screen.getByRole("button", { name: /^menu$/i });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveAttribute("aria-controls", "mobile-site-menu");
+
+    await user.click(button);
+
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("closes the mobile menu on outside click", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    await user.click(screen.getByRole("button", { name: /^menu$/i }));
+    expect(screen.getByRole("navigation", { name: /mobile navigation/i })).toBeInTheDocument();
+
+    await user.click(document.body);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("navigation", { name: /mobile navigation/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("closes the mobile menu on Escape and returns focus to the trigger", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    const button = screen.getByRole("button", { name: /^menu$/i });
+    await user.click(button);
+    expect(screen.getByRole("navigation", { name: /mobile navigation/i })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => {
+      expect(screen.queryByRole("navigation", { name: /mobile navigation/i })).not.toBeInTheDocument();
+    });
+    expect(button).toHaveFocus();
+  });
+
+  it("moves focus to the first mobile menu item when opening from the keyboard", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    const button = screen.getByRole("button", { name: /^menu$/i });
+    button.focus();
+
+    await user.keyboard("{Enter}");
+
+    const mobileMenu = screen.getByRole("navigation", { name: /mobile navigation/i });
+    expect(within(mobileMenu).getByRole("link", { name: /^capabilities$/i })).toHaveFocus();
+  });
+
+  it("marks the current page in the mobile menu with aria-current and an active class", async () => {
+    const user = userEvent.setup();
+
     render(await SolutionsPage({ params: Promise.resolve({ locale: "en" }) }));
 
-    const quickLinks = screen.getByRole("navigation", { name: /quick links/i });
-    expect(within(quickLinks).getByRole("link", { name: /^solutions$/i })).toHaveAttribute(
-      "aria-current",
-      "page",
+    await user.click(screen.getByRole("button", { name: /^menu$/i }));
+
+    const mobileMenu = screen.getByRole("navigation", { name: /mobile navigation/i });
+    const activeLink = within(mobileMenu).getByRole("link", { name: /^solutions$/i });
+
+    expect(activeLink).toHaveAttribute("aria-current", "page");
+    expect(activeLink.className).toContain("bg-white/[0.08]");
+  });
+
+  it("uses localized mobile menu labels for Chinese and keeps the about route localized", async () => {
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "zh" }) }));
+
+    await user.click(screen.getByRole("button", { name: /^菜单$/i }));
+
+    const mobileMenu = screen.getByRole("navigation", { name: /移动端导航/i });
+    expect(within(mobileMenu).getByRole("link", { name: /^关于$/i })).toHaveAttribute(
+      "href",
+      "/zh/about",
     );
+  });
+
+  it("closes the mobile menu after locale changes", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    await user.click(screen.getByRole("button", { name: /^menu$/i }));
+    expect(screen.getByRole("navigation", { name: /mobile navigation/i })).toBeInTheDocument();
+
+    rerender(await LocaleHomePage({ params: Promise.resolve({ locale: "zh" }) }));
+
+    expect(screen.queryByRole("navigation", { name: /移动端导航/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^菜单$/i })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes the mobile menu when the viewport crosses to desktop width", async () => {
+    const media = installMatchMedia(false);
+    const user = userEvent.setup();
+
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
+
+    await user.click(screen.getByRole("button", { name: /^menu$/i }));
+    expect(screen.getByRole("navigation", { name: /mobile navigation/i })).toBeInTheDocument();
+
+    media.setMatches(true);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("navigation", { name: /mobile navigation/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("keeps the header breakpoint split on lg and removes the old quick links markup in source", () => {
+    const source = readFileSync(appPath("marketing-ui.tsx"), "utf8");
+
+    expect(source).toContain('className="hidden items-center gap-2 lg:flex"');
+    expect(source).toContain(
+      'className="hidden text-[0.64rem] tracking-[0.32em] text-white/34 uppercase lg:block"',
+    );
+    expect(source).toContain(
+      'className="hidden rounded-full border border-white/12 bg-white px-5 py-3 text-sm font-medium text-black transition hover:border-white/20 hover:bg-[var(--accent-soft)] lg:inline-flex"',
+    );
+    expect(source).toContain('aria-controls="mobile-site-menu"');
+    expect(source).not.toContain("aria-label={copy.quickLinksLabel}");
   });
 
   it("renders a page-level heading on standalone routes", async () => {
@@ -98,16 +282,6 @@ describe("marketing routes", () => {
         name: /built to earn trust from modern enterprise teams/i,
       }),
     ).toBeInTheDocument();
-  });
-
-  it("exposes mobile quick links that include the about page", async () => {
-    render(await LocaleHomePage({ params: Promise.resolve({ locale: "en" }) }));
-
-    const quickLinks = screen.getByRole("navigation", { name: /quick links/i });
-    expect(within(quickLinks).getByRole("link", { name: /^about$/i })).toHaveAttribute(
-      "href",
-      "/en/about",
-    );
   });
 
   it("sets html lang to the route locale in the locale layout source", () => {
@@ -137,4 +311,3 @@ describe("marketing routes", () => {
     expect(screen.getByRole("heading", { name: /企业级可信度从平台底层开始构建/i })).toBeInTheDocument();
   });
 });
-
