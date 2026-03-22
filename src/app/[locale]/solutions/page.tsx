@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FinalCtaSection, MarketingShell, SolutionsSection } from "../../marketing-ui";
+import { CapabilitiesSection, FinalCtaSection, MarketingShell, SolutionsSection, TrustSection } from "../../marketing-ui";
 import { getPageMetadata, resolveLocale } from "../../site-content";
 
 export async function generateMetadata({
@@ -21,6 +21,8 @@ export default async function SolutionsPage({
   return (
     <MarketingShell locale={locale} currentPath={`/${locale}/solutions`}>
       <SolutionsSection locale={locale} headingAs="h1" />
+      <CapabilitiesSection locale={locale} />
+      <TrustSection locale={locale} />
       <FinalCtaSection locale={locale} />
     </MarketingShell>
   );
