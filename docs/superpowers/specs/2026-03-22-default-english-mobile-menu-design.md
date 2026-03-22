@@ -19,7 +19,7 @@ Clarionis should no longer stop first-time visitors on a language-picker landing
 ### Root path
 - Visiting `/` should end at `/en` immediately for production traffic.
 - Because this repo uses Next.js static export (`output: "export"`), this redirect should be implemented as a Cloudflare Pages hosting-level redirect rather than a Next.js `redirects()` config.
-- The source-controlled deployment artifact should be the Cloudflare Pages redirect file checked into the repo (for example, the standard `_redirects` file emitted with the static site), with a rule that sends `/` to `/en`.
+- The source-controlled deployment artifact should be `public/_redirects`, copied into the static output, with an explicit rule that redirects `/` to `/en` using a permanent redirect.
 - The standalone language selection screen should be removed from the primary browsing flow.
 - Canonical browsing paths remain locale-prefixed (`/en`, `/zh`, `/en/capabilities`, `/zh/about`, etc.).
 - When the hosting redirect is not in effect locally, the exported `/` page should behave as a minimal fallback that immediately navigates visitors to `/en`, without reintroducing a language-choice UI.
@@ -37,7 +37,7 @@ The current mobile experience stacks a four-item quick-links block directly bene
 At widths below the existing `lg` breakpoint, the sticky header should contain only:
 - Brand mark / wordmark on the left
 - Locale switcher on the right
-- `Menu` button on the right
+- A localized menu trigger on the right (`Menu` in English, `菜单` in Chinese)
 
 At `lg` and above, the current desktop header pattern remains in place.
 
@@ -82,7 +82,7 @@ Key visual intent:
 ## Accessibility and semantics
 - The `Menu` control should be a real button.
 - It should expose expanded/collapsed state with `aria-expanded` and point at the menu panel with `aria-controls`.
-- The button should keep a stable accessible name (`Menu` is sufficient if the visible label remains present).
+- The trigger should be localized in visible text and accessible name (`Menu` in English, `菜单` in Chinese).
 - When the panel opens via keyboard, focus should move into the panel to the first interactive item.
 - When the panel closes via keyboard dismissal, focus should return to the `Menu` button.
 - The mobile menu container should have a clear navigation landmark label.
@@ -110,7 +110,7 @@ Add or update tests to verify:
 - Production redirect handling for `/` is defined in the checked-in Cloudflare Pages redirect artifact.
 - The exported `/` fallback does not render the old language picker and instead immediately navigates toward `/en`.
 - The old language selection content is no longer the live root entry experience.
-- Mobile navigation exposes a `Menu` control instead of the old top quick-links block below the `lg` breakpoint.
+- Mobile navigation exposes a localized menu trigger instead of the old top quick-links block below the `lg` breakpoint.
 - The old mobile quick-links block is absent in the mobile layout.
 - The mobile menu includes the four page links and the existing `mailto` CTA.
 - The mobile menu renders correctly in both English and Chinese, including localized labels.
