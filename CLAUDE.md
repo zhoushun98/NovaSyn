@@ -24,7 +24,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Build command: `npm run build`
   - Build output directory: `out`
   - Node.js version: `20`
-- `public/_redirects` is intentionally empty. The root `/` is served directly as the English homepage via `src/app/(entry)/page.tsx`.
+- `public/_redirects` is intentionally empty. The root `/` is served directly as the English homepage via `src/app/(entry)/page.tsx`. It does not redirect.
+- `public/_headers` sets HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) for all Cloudflare Pages responses.
 - If future changes add request-time Next.js features such as `app/**/route.ts`, middleware, Server Actions, `cookies()`, `headers()`, or server-side `next/image` optimization, re-evaluate the deployment approach before implementing them.
 
 ## Architecture overview
@@ -39,6 +40,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`src/app/site-content.ts`** — The single source of truth for all localized content and routing helpers. Exports `locales`, `Locale`, `Content`, `PageKey`, `NavItem`, `localeSwitchLabels`, and all typed content (capabilities, scenarios, proof metrics, case studies, trust points, etc.) as a `Record<Locale, Content>`. Also exports `getStaticLocaleParams()`, `resolveLocale()`, `getContent()`, `buildLocalizedPath()`, `localizeCurrentPath()`, and `getPageMetadata()`.
 - **`src/app/marketing-ui.tsx`** — All shared UI components as a single client component file (`"use client"`). Exports `MarketingShell` (header, footer, mobile menu, language dropdown switcher), section components (`HomeHero`, `ThesisSection`, `CapabilitiesSection`, `SolutionsSection`, `CustomersSection`, `TrustSection`, `FinalCtaSection`), and `PagePreviewLinks`.
 - **`src/app/[locale]/layout.tsx`** — Locale-level layout. Handles `generateStaticParams` for static export. Loads `Cormorant_Garamond` + `Manrope` for all locales; adds `Noto_Sans_JP` and switches font variables when `locale === "ja"`.
+- **`src/app/(entry)/layout.tsx`** — Root-level layout with English metadata and `<html lang="en">`. Unchanged when adding locales.
 - **`src/app/[locale]/page.tsx`** — Homepage (hero + thesis + page previews + CTA).
 - **`src/app/[locale]/capabilities/page.tsx`**, **`solutions/page.tsx`**, **`customers/page.tsx`**, **`about/page.tsx`** — Individual marketing pages composing section components from `marketing-ui.tsx`.
 
@@ -67,7 +69,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Global visual styling lives in `src/app/globals.css`; this includes the page atmosphere, background treatment, and base element rules.
 - Fonts are loaded in `src/app/[locale]/layout.tsx` via `next/font/google`. Display: `Cormorant_Garamond`; sans: `Manrope`; Japanese: `Noto_Sans_JP` (applied via CSS variable override when `locale === "ja"`).
-- Japanese heading sizes are scaled down via `sectionHeadingClass(locale)` helper in `marketing-ui.tsx` and conditional classes on the hero `h1`, because `Noto_Sans_JP` renders visually larger than `Cormorant_Garamond`. The `body[data-locale="ja"]` CSS rules in `globals.css` also reset letter-spacing for headings.
+- Japanese heading sizes are scaled down via `sectionHeadingClass(locale)` helper in `marketing-ui.tsx` and conditional classes on the hero `h1`, because `Noto_Sans_JP` renders visually larger than `Cormorant_Garamond`. The layout sets `data-locale={locale}` on `<body>`; `globals.css` targets `[data-locale="ja"]` to reset letter-spacing on headings.
 - The UI relies heavily on Tailwind v4 utility classes rather than separate component stylesheets.
 - Framer Motion is used in `marketing-ui.tsx` for reveal and transition behavior via `sectionReveal` and `AnimatePresence`.
 - The responsive breakpoint for desktop navigation is `lg:` (1024px). Below that, a mobile menu dropdown is shown.
@@ -85,3 +87,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Read the relevant Next.js docs under `node_modules/next/dist/docs/` before making framework-level changes; this repo explicitly depends on current Next.js 16 behavior rather than older conventions.
 - React 19 and Next.js 16 have stricter lint rules than prior versions: `react-hooks/set-state-in-effect` forbids synchronous setState in effects; `react-hooks/refs` forbids ref access during render. Use `queueMicrotask` or React's `useState` props-change pattern as needed.
 - When editing visible copy or section UI, update all 5 locale entries in `site-content.ts`.
+- `docs/superpowers/` is gitignored — it holds AI planning artifacts generated during development sessions and should never be committed.
