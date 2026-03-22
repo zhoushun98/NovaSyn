@@ -17,9 +17,11 @@ Clarionis should no longer stop first-time visitors on a language-picker landing
 
 ## Routing behavior
 ### Root path
-- Visiting `/` should immediately redirect to `/en`.
+- Visiting `/` should end at `/en` immediately for production traffic.
+- Because this repo uses Next.js static export (`output: "export"`), this redirect should be implemented as a Cloudflare Pages hosting-level redirect rather than a Next.js `redirects()` config.
 - The standalone language selection screen should be removed from the primary browsing flow.
 - Canonical browsing paths remain locale-prefixed (`/en`, `/zh`, `/en/capabilities`, `/zh/about`, etc.).
+- Local development and test coverage should use a build-safe fallback for `/` that aligns with the production outcome, but production deployment behavior is the hosting-level redirect.
 
 ### Locale switching
 - Switching languages should continue to preserve the current page path.
@@ -46,13 +48,18 @@ The panel should contain, in order:
 2. `Solutions`
 3. `Customers`
 4. `About`
-5. Primary CTA (`Book a Demo` / localized equivalent)
+5. Primary CTA (`Book a Demo` / localized equivalent), using the same `mailto` destination as the existing header CTA rather than introducing a new flow
 
 ### Interaction rules
 - The panel should open and close without navigating away.
 - The active page should remain visually distinct and retain `aria-current="page"`.
 - The locale switcher remains visible even when the menu is closed.
 - Choosing a nav item closes the menu through normal route navigation.
+- Choosing the locale switcher should preserve the current path and reset the menu to closed on the destination route.
+- Clicking outside the panel closes it.
+- Pressing `Escape` closes it.
+- Crossing from mobile to desktop viewport closes and resets the panel state.
+- The panel may remain open during scroll until one of the explicit close actions above occurs.
 - The panel should feel like part of the header system, not a separate page section.
 
 ## Desktop behavior
@@ -71,7 +78,10 @@ Key visual intent:
 
 ## Accessibility and semantics
 - The `Menu` control should be a real button.
-- It should expose expanded/collapsed state with the appropriate ARIA attributes.
+- It should expose expanded/collapsed state with `aria-expanded` and point at the menu panel with `aria-controls`.
+- The button should keep a stable accessible name (`Menu` is sufficient if the visible label remains present).
+- When the panel opens via keyboard, focus should move into the panel to the first interactive item.
+- When the panel closes via keyboard dismissal, focus should return to the `Menu` button.
 - The mobile menu container should have a clear navigation landmark label.
 - Active links should continue to expose `aria-current="page"`.
 - Redirect behavior should not break access to localized routes directly.
@@ -93,12 +103,15 @@ Key visual intent:
 
 ## Testing expectations
 Add or update tests to verify:
-- `/` redirects to `/en`.
-- The old language selection content is no longer rendered as the root entry screen.
+- Production redirect handling for `/` is defined in a static-export-compatible way, with coverage aimed at the chosen Cloudflare Pages redirect artifact or equivalent deployment-facing configuration.
+- Any local/test fallback for `/` aligns with the production outcome of landing on `/en`.
+- The old language selection content is no longer the live root entry experience.
 - Mobile navigation exposes a `Menu` control instead of the old top quick-links block.
-- The mobile menu includes the four page links and primary CTA.
-- Active-page semantics still work in the mobile navigation.
-- Locale switching still preserves the current route.
+- The old mobile quick-links block is absent in the mobile layout.
+- The mobile menu includes the four page links and the existing `mailto` CTA.
+- The mobile menu renders correctly in both English and Chinese, including localized labels.
+- `aria-expanded`, `aria-controls`, and `aria-current` behave correctly.
+- Locale switching still preserves the current route and resets the mobile menu state.
 
 ## Risks and mitigations
 - **Risk:** Mobile menu state could conflict with locale switching or route changes.
