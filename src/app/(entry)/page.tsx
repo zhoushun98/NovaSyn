@@ -1,6 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function Home() {
+  useEffect(() => {
+    window.location.replace("/en");
+  }, []);
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg)] px-6 py-20 text-[var(--fg)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(124,170,255,0.2),transparent_22%),radial-gradient(circle_at_82%_14%,rgba(255,255,255,0.12),transparent_18%),radial-gradient(circle_at_50%_120%,rgba(83,113,195,0.18),transparent_34%)]" />
@@ -9,23 +16,17 @@ export default function Home() {
           Clarionis 明谛
         </span>
         <h1 className="mt-6 text-4xl leading-tight tracking-[-0.05em] text-white md:text-6xl">
-          Choose your preferred language experience.
+          Redirecting to English.
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-8 text-white/62 md:text-lg">
-          The site now ships as a multi-page bilingual experience. Start in English or Chinese.
+          If the site does not continue automatically, use the link below to enter the English experience.
         </p>
         <div className="mt-10 flex flex-wrap gap-4">
           <Link
             href="/en"
             className="inline-flex rounded-full bg-white px-6 py-3.5 text-sm font-medium text-black transition hover:bg-[var(--accent-soft)]"
           >
-            English
-          </Link>
-          <Link
-            href="/zh"
-            className="inline-flex rounded-full border border-white/12 bg-white/[0.03] px-6 py-3.5 text-sm font-medium text-white/78 transition hover:border-white/24 hover:bg-white/[0.06] hover:text-white"
-          >
-            中文
+            Continue to English
           </Link>
         </div>
       </section>

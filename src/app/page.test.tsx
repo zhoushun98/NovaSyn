@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { render, screen, within } from "@testing-library/react";
+import { vi } from "vitest";
 import { getStaticLocaleParams } from "./site-content";
 import AboutPage from "./[locale]/about/page";
 import LocaleHomePage from "./[locale]/page";
@@ -11,11 +12,35 @@ import Home from "./(entry)/page";
 const appPath = (...segments: string[]) => path.join(process.cwd(), "src", "app", ...segments);
 
 describe("marketing routes", () => {
-  it("offers locale entry links on the root page", () => {
+  it("defines a production redirect from / to /en", () => {
+    const redirects = readFileSync(path.join(process.cwd(), "public", "_redirects"), "utf8");
+
+    expect(redirects).toBe("/ /en 301\n");
+  });
+
+  it("renders a root fallback that sends visitors to /en without showing a language picker", () => {
+    const replace = vi.fn();
+    const originalLocation = window.location;
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: {
+        ...originalLocation,
+        replace,
+      },
+    });
+
     render(<Home />);
 
-    expect(screen.getByRole("link", { name: /english/i })).toHaveAttribute("href", "/en");
-    expect(screen.getByRole("link", { name: /中文/i })).toHaveAttribute("href", "/zh");
+    expect(screen.getByRole("heading", { name: /redirecting to english/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /continue to english/i })).toHaveAttribute("href", "/en");
+    expect(screen.queryByRole("link", { name: /中文/i })).not.toBeInTheDocument();
+    expect(replace).toHaveBeenCalledWith("/en");
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
   it("statically exports both supported locales", () => {
