@@ -16,6 +16,12 @@ const panelClass =
   "rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl";
 const desktopBreakpointQuery = "(min-width: 1024px)";
 
+function sectionHeadingClass(locale: Locale) {
+  return locale === "ja"
+    ? "text-[1.65rem] leading-snug tracking-[-0.02em] text-white sm:text-3xl md:text-[2.6rem]"
+    : "text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]";
+}
+
 function SectionLabel({ children }: { children: string }) {
   return (
     <span className="inline-flex items-center rounded-full border border-white/12 bg-white/[0.055] px-3.5 py-1.5 text-[0.66rem] font-semibold tracking-[0.34em] text-white/58 uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
@@ -225,7 +231,7 @@ export function MarketingShell({
                 aria-expanded={isLangOpen}
                 aria-haspopup="true"
                 onClick={() => setIsLangOpen((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition hover:bg-white/[0.08] hover:text-white"
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/78 transition hover:bg-white/[0.08] hover:text-white"
               >
                 <span>{localeSwitchLabels[locale].label}</span>
                 <svg
@@ -279,7 +285,7 @@ export function MarketingShell({
               aria-controls="mobile-site-menu"
               aria-expanded={isMobileMenuOpen}
               onClick={() => setIsMobileMenuOpen((value) => !value)}
-              className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/78 transition hover:bg-white/[0.08] hover:text-white lg:hidden"
+              className="inline-flex whitespace-nowrap rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/78 transition hover:bg-white/[0.08] hover:text-white lg:hidden"
             >
               {copy.mobileMenuLabel}
             </button>
@@ -354,7 +360,7 @@ export function HomeHero({ locale }: { locale: Locale }) {
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="mt-6"
           >
-            <h1 className="max-w-5xl text-[3.15rem] leading-[0.9] font-medium tracking-[-0.065em] text-white sm:text-[4.8rem] md:text-[6.25rem] xl:text-[7.2rem]">
+            <h1 className={`max-w-5xl font-medium text-white ${locale === "ja" ? "text-[2.5rem] leading-[1.15] tracking-[-0.03em] sm:text-[3.6rem] md:text-[4.8rem] xl:text-[5.6rem]" : "text-[3.15rem] leading-[0.9] tracking-[-0.065em] sm:text-[4.8rem] md:text-[6.25rem] xl:text-[7.2rem]"}`}>
               {copy.hero.title}
             </h1>
             <p className="mt-6 max-w-2xl text-[1.02rem] leading-8 text-white/62 md:text-lg md:leading-9">
@@ -455,7 +461,7 @@ export function ThesisSection({ locale, headingAs = "h2" }: { locale: Locale; he
     >
       <div>
         <SectionLabel>{copy.thesis.eyebrow}</SectionLabel>
-        <HeadingTag className="mt-6 max-w-xl text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]">
+        <HeadingTag className={`mt-6 max-w-xl ${sectionHeadingClass(locale)}`}>
           {copy.thesis.heading}
         </HeadingTag>
       </div>
@@ -487,7 +493,7 @@ export function CapabilitiesSection({
     <motion.section {...sectionReveal} className="space-y-8">
       <div className="max-w-2xl">
         <SectionLabel>{copy.capabilities.eyebrow}</SectionLabel>
-        <HeadingTag className="mt-6 text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]">
+        <HeadingTag className={`mt-6 ${sectionHeadingClass(locale)}`}>
           {copy.capabilities.heading}
         </HeadingTag>
       </div>
@@ -529,7 +535,7 @@ export function SolutionsSection({
     <motion.section {...sectionReveal} className="grid gap-8 md:grid-cols-[0.82fr_1.18fr] md:gap-12">
       <div>
         <SectionLabel>{copy.scenarios.eyebrow}</SectionLabel>
-        <HeadingTag className="mt-6 text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]">
+        <HeadingTag className={`mt-6 ${sectionHeadingClass(locale)}`}>
           {copy.scenarios.heading}
         </HeadingTag>
       </div>
@@ -570,7 +576,7 @@ export function CustomersSection({
     <motion.section {...sectionReveal} className="space-y-8">
       <div className="max-w-2xl">
         <SectionLabel>{copy.proof.eyebrow}</SectionLabel>
-        <HeadingTag className="mt-6 text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]">
+        <HeadingTag className={`mt-6 ${sectionHeadingClass(locale)}`}>
           {copy.proof.heading}
         </HeadingTag>
       </div>
@@ -621,7 +627,7 @@ export function TrustSection({
     <motion.section {...sectionReveal} className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:gap-12">
       <div>
         <SectionLabel>{copy.trust.eyebrow}</SectionLabel>
-        <HeadingTag className="mt-6 text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.2rem]">
+        <HeadingTag className={`mt-6 ${sectionHeadingClass(locale)}`}>
           {copy.trust.heading}
         </HeadingTag>
       </div>
@@ -649,7 +655,7 @@ export function FinalCtaSection({ locale }: { locale: Locale }) {
       <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           <SectionLabel>{copy.finalCta.eyebrow}</SectionLabel>
-          <h2 className="mt-6 text-3xl leading-tight tracking-[-0.05em] text-white sm:text-4xl md:text-[3.1rem]">
+          <h2 className={`mt-6 ${sectionHeadingClass(locale)}`}>
             {copy.finalCta.heading}
           </h2>
           <p className="mt-5 text-base leading-8 text-white/62">{copy.finalCta.description}</p>

@@ -8,10 +8,10 @@ export type PageKey = "home" | "capabilities" | "solutions" | "customers" | "abo
 
 export const localeSwitchLabels: Record<Locale, { label: string; ariaLabel: string }> = {
   en: { label: "EN", ariaLabel: "EN" },
-  zh: { label: "中文", ariaLabel: "中文" },
+  zh: { label: "ZH", ariaLabel: "ZH" },
   de: { label: "DE", ariaLabel: "DE" },
   fr: { label: "FR", ariaLabel: "FR" },
-  ja: { label: "日本語", ariaLabel: "日本語" },
+  ja: { label: "JA", ariaLabel: "JA" },
 };
 
 export type NavItem = {

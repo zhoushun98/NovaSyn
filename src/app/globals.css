@@ -64,6 +64,15 @@ h3 {
   font-family: var(--font-display), serif;
 }
 
+[data-locale="ja"] h1 {
+  letter-spacing: 0;
+}
+
+[data-locale="ja"] h2,
+[data-locale="ja"] h3 {
+  letter-spacing: -0.01em;
+}
+
 a {
   text-decoration: none;
 }

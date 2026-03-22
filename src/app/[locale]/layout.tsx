@@ -46,6 +46,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${display.variable} ${sans.variable} ${isJapanese ? japaneseSans.variable : ""} h-full`}>
       <body
+        data-locale={locale}
         className={`min-h-full bg-[var(--bg)] text-[var(--fg)] antialiased ${
           isJapanese ? "[--font-sans:var(--font-sans-ja)] [--font-display:var(--font-sans-ja)]" : ""
         }`}

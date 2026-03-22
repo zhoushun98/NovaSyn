@@ -105,10 +105,10 @@ describe("marketing routes", () => {
 
     await user.click(screen.getByRole("button", { name: /switch language/i }));
 
-    expect(screen.getByRole("link", { name: "中文" })).toHaveAttribute("href", "/zh/solutions");
+    expect(screen.getByRole("link", { name: "ZH" })).toHaveAttribute("href", "/zh/solutions");
     expect(screen.getByRole("link", { name: "DE" })).toHaveAttribute("href", "/de/solutions");
     expect(screen.getByRole("link", { name: "FR" })).toHaveAttribute("href", "/fr/solutions");
-    expect(screen.getByRole("link", { name: "日本語" })).toHaveAttribute("href", "/ja/solutions");
+    expect(screen.getByRole("link", { name: "JA" })).toHaveAttribute("href", "/ja/solutions");
   });
 
   it("keeps mobile menu copy in site content for all locales", () => {
@@ -159,10 +159,10 @@ describe("marketing routes", () => {
 
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("link", { name: "EN" })).toHaveAttribute("href", "/en");
-    expect(screen.getByRole("link", { name: "中文" })).toHaveAttribute("href", "/zh");
+    expect(screen.getByRole("link", { name: "ZH" })).toHaveAttribute("href", "/zh");
     expect(screen.getByRole("link", { name: "DE" })).toHaveAttribute("href", "/de");
     expect(screen.getByRole("link", { name: "FR" })).toHaveAttribute("href", "/fr");
-    expect(screen.getByRole("link", { name: "日本語" })).toHaveAttribute("href", "/ja");
+    expect(screen.getByRole("link", { name: "JA" })).toHaveAttribute("href", "/ja");
   });
 
   it("toggles aria-expanded on the mobile menu button and wires aria-controls", async () => {
